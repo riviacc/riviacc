@@ -1,10 +1,1372 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Website Saya</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Aplikasi Stok</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       LOGIN
+       ========================= */
+
+    #loginPage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(
+        135deg,
+        #1d4ed8,
+        #2563eb,
+        #0f172a
+      );
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 35px;
+      border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.2);
+    }
+
+    .login-card h1 {
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #2563eb;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    #loginMessage {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* =========================
+       APP
+       ========================= */
+
+    #appPage {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .role-badge {
+      background: #2563eb;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .btn-logout {
+      background: #dc2626;
+      color: white;
+      padding: 8px 14px;
+    }
+
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      width: 230px;
+      background: white;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px 12px;
+    }
+
+    .menu-title {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin: 10px 12px;
+    }
+
+    .menu-btn {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 12px;
+      text-align: left;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 4px;
+    }
+
+    .menu-btn:hover,
+    .menu-btn.active {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .content {
+      flex: 1;
+      padding: 25px;
+      overflow-x: auto;
+    }
+
+    .page-title {
+      margin-top: 0;
+    }
+
+    /* =========================
+       DASHBOARD
+       ========================= */
+
+    .cards {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .card-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .card-value {
+      font-size: 30px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* =========================
+       TABLE
+       ========================= */
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    /* =========================
+       MOBILE
+       ========================= */
+
+    @media (max-width: 700px) {
+
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        gap: 5px;
+      }
+
+      .menu-title {
+        display: none;
+      }
+
+      .menu-btn {
+        width: auto;
+        white-space: nowrap;
+      }
+
+      .topbar {
+        padding: 0 12px;
+      }
+
+      .user-info span:first-child {
+        display: none;
+      }
+
+      .content {
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <h1>Halo!</h1>
-    <p>hi</p>
+
+  <!-- =========================
+       LOGIN
+       ========================= -->
+
+  <section id="loginPage">
+
+    <div class="login-card">
+
+      <h1>📦 Aplikasi Stok</h1>
+
+      <p>
+        Silakan masuk ke sistem
+      </p>
+
+      <form id="loginForm">
+
+        <div class="form-group">
+
+          <label for="username">
+            Username
+          </label>
+
+          <input
+            type="text"
+            id="username"
+            autocomplete="username"
+            required
+          >
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            autocomplete="current-password"
+            required
+          >
+
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          id="loginButton"
+        >
+          Masuk
+        </button>
+
+      </form>
+
+      <div id="loginMessage"></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       APPLICATION
+       ========================= -->
+
+  <section
+    id="appPage"
+    class="hidden"
+  >
+
+    <header class="topbar">
+
+      <div class="brand">
+        📦 Aplikasi Stok
+      </div>
+
+      <div class="user-info">
+
+        <span id="userName">
+          -
+        </span>
+
+        <span
+          id="userRole"
+          class="role-badge"
+        >
+          -
+        </span>
+
+        <button
+          class="btn btn-logout"
+          onclick="logout()"
+        >
+          Keluar
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div class="layout">
+
+      <aside
+        class="sidebar"
+        id="sidebar"
+      >
+
+        <div class="menu-title">
+          Menu
+        </div>
+
+        <button
+          class="menu-btn active"
+          data-page="dashboard"
+          onclick="showPage('dashboard')"
+        >
+          📊 Dashboard
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="barang"
+          onclick="showPage('barang')"
+        >
+          📦 Barang
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="transaksi"
+          onclick="showPage('transaksi')"
+        >
+          🔄 Transaksi
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="stok"
+          onclick="showPage('stok')"
+        >
+          📈 Stok
+        </button>
+
+        <button
+          class="menu-btn admin-only"
+          data-page="users"
+          onclick="showPage('users')"
+        >
+          👥 Pengguna
+        </button>
+
+        <button
+          class="menu-btn admin-only"
+          data-page="log"
+          onclick="showPage('log')"
+        >
+          📝 Log
+        </button>
+
+      </aside>
+
+
+      <main class="content">
+
+        <!-- DASHBOARD -->
+
+        <div
+          id="page-dashboard"
+          class="page"
+        >
+
+          <h2 class="page-title">
+            Dashboard
+          </h2>
+
+          <div class="cards">
+
+            <div class="card">
+              <div class="card-label">
+                Total Barang
+              </div>
+
+              <div
+                class="card-value"
+                id="totalBarang"
+              >
+                -
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-label">
+                Total Stok
+              </div>
+
+              <div
+                class="card-value"
+                id="totalStok"
+              >
+                -
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-label">
+                Stok Menipis
+              </div>
+
+              <div
+                class="card-value"
+                id="stokMenipis"
+              >
+                -
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-label">
+                Stok Habis
+              </div>
+
+              <div
+                class="card-value"
+                id="stokHabis"
+              >
+                -
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-label">
+                Barang Masuk
+              </div>
+
+              <div
+                class="card-value"
+                id="barangMasuk"
+              >
+                -
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-label">
+                Barang Keluar
+              </div>
+
+              <div
+                class="card-value"
+                id="barangKeluar"
+              >
+                -
+              </div>
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <h3>
+              Aktivitas Terakhir
+            </h3>
+
+            <div
+              id="recentActivity"
+            >
+              Memuat...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- BARANG -->
+
+        <div
+          id="page-barang"
+          class="page hidden"
+        >
+
+          <h2 class="page-title">
+            Data Barang
+          </h2>
+
+          <div class="panel">
+
+            <div
+              id="barangTable"
+              class="table-wrapper"
+            >
+              Memuat...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- TRANSAKSI -->
+
+        <div
+          id="page-transaksi"
+          class="page hidden"
+        >
+
+          <h2 class="page-title">
+            Transaksi
+          </h2>
+
+          <div class="panel">
+
+            <p>
+              Form transaksi akan kita aktifkan
+              pada tahap berikutnya.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- STOK -->
+
+        <div
+          id="page-stok"
+          class="page hidden"
+        >
+
+          <h2 class="page-title">
+            Monitoring Stok
+          </h2>
+
+          <div class="panel">
+
+            <div
+              id="stokTable"
+              class="table-wrapper"
+            >
+              Memuat...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- USERS -->
+
+        <div
+          id="page-users"
+          class="page hidden"
+        >
+
+          <h2 class="page-title">
+            Pengguna
+          </h2>
+
+          <div class="panel">
+
+            <div
+              id="usersTable"
+              class="table-wrapper"
+            >
+              Memuat...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- LOG -->
+
+        <div
+          id="page-log"
+          class="page hidden"
+        >
+
+          <h2 class="page-title">
+            Log Aktivitas
+          </h2>
+
+          <div class="panel">
+
+            <p>
+              Modul log akan kita tampilkan
+              setelah endpoint log kita aktifkan.
+            </p>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </section>
+
+
+<script>
+
+  /*
+   * ======================================
+   * KONFIGURASI
+   * ======================================
+   */
+
+  const API_URL =
+    'https://script.google.com/macros/s/AKfycbx1DTb7OiIarQLyaRAUy0cNbYvnMUt0m3WPaXBjCks-FwAW5ZaJhoWp8fpQ_PDZANptBQ/exec';
+
+
+  /*
+   * ======================================
+   * STATE
+   * ======================================
+   */
+
+  let sessionToken =
+    localStorage.getItem('stok_token') || '';
+
+  let currentUser =
+    JSON.parse(
+      localStorage.getItem('stok_user') || 'null'
+    );
+
+
+  /*
+   * ======================================
+   * API
+   * ======================================
+   */
+
+  async function api(action, data = {}) {
+
+    const response =
+      await fetch(API_URL, {
+
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+
+        body: JSON.stringify({
+          action: action,
+          ...data
+        })
+
+      });
+
+    return await response.json();
+  }
+
+
+  /*
+   * ======================================
+   * LOGIN
+   * ======================================
+   */
+
+  document
+    .getElementById('loginForm')
+    .addEventListener('submit', async function(event) {
+
+      event.preventDefault();
+
+      const username =
+        document
+          .getElementById('username')
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById('password')
+          .value;
+
+      const button =
+        document.getElementById('loginButton');
+
+      const message =
+        document.getElementById('loginMessage');
+
+      button.disabled = true;
+      button.textContent = 'Memproses...';
+
+      message.textContent = '';
+
+      try {
+
+        const result =
+          await api('login', {
+            username: username,
+            password: password
+          });
+
+        if (!result.success) {
+
+          message.textContent =
+            result.message ||
+            'Login gagal.';
+
+          button.disabled = false;
+          button.textContent = 'Masuk';
+
+          return;
+        }
+
+        sessionToken =
+          result.token;
+
+        currentUser =
+          result.user;
+
+        localStorage.setItem(
+          'stok_token',
+          sessionToken
+        );
+
+        localStorage.setItem(
+          'stok_user',
+          JSON.stringify(currentUser)
+        );
+
+        showApplication();
+
+      } catch (error) {
+
+        message.textContent =
+          'Tidak dapat terhubung ke server.';
+
+        console.error(error);
+
+      }
+
+      button.disabled = false;
+      button.textContent = 'Masuk';
+
+    });
+
+
+  /*
+   * ======================================
+   * TAMPILKAN APLIKASI
+   * ======================================
+   */
+
+  function showApplication() {
+
+    document
+      .getElementById('loginPage')
+      .classList.add('hidden');
+
+    document
+      .getElementById('appPage')
+      .classList.remove('hidden');
+
+    document
+      .getElementById('userName')
+      .textContent =
+      currentUser?.nama ||
+      currentUser?.username ||
+      '-';
+
+    document
+      .getElementById('userRole')
+      .textContent =
+      currentUser?.role ||
+      '-';
+
+    configureMenu();
+
+    showPage('dashboard');
+
+  }
+
+
+  /*
+   * ======================================
+   * MENU BERDASARKAN ROLE
+   * ======================================
+   */
+
+  function configureMenu() {
+
+    const role =
+      String(
+        currentUser?.role || ''
+      ).toLowerCase();
+
+    document
+      .querySelectorAll('.admin-only')
+      .forEach(element => {
+
+        element.classList.toggle(
+          'hidden',
+          role !== 'admin'
+        );
+
+      });
+
+  }
+
+
+  /*
+   * ======================================
+   * PAGE
+   * ======================================
+   */
+
+  function showPage(page) {
+
+    document
+      .querySelectorAll('.page')
+      .forEach(element => {
+
+        element.classList.add('hidden');
+
+      });
+
+    const selected =
+      document.getElementById(
+        'page-' + page
+      );
+
+    if (selected) {
+      selected.classList.remove('hidden');
+    }
+
+    document
+      .querySelectorAll('.menu-btn')
+      .forEach(button => {
+
+        button.classList.toggle(
+          'active',
+          button.dataset.page === page
+        );
+
+      });
+
+
+    if (page === 'dashboard') {
+      loadDashboard();
+    }
+
+    if (page === 'barang') {
+      loadBarang();
+    }
+
+    if (page === 'stok') {
+      loadStok();
+    }
+
+    if (page === 'users') {
+      loadUsers();
+    }
+
+  }
+
+
+  /*
+   * ======================================
+   * DASHBOARD
+   * ======================================
+   */
+
+  async function loadDashboard() {
+
+    try {
+
+      const result =
+        await api('dashboard', {
+          token: sessionToken
+        });
+
+      if (!result.success) {
+
+        handleApiError(result);
+        return;
+
+      }
+
+      const data =
+        result.data;
+
+      document.getElementById(
+        'totalBarang'
+      ).textContent =
+        data.totalBarang ?? 0;
+
+      document.getElementById(
+        'totalStok'
+      ).textContent =
+        data.totalStok ?? 0;
+
+      document.getElementById(
+        'stokMenipis'
+      ).textContent =
+        data.stokMenipis ?? 0;
+
+      document.getElementById(
+        'stokHabis'
+      ).textContent =
+        data.stokHabis ?? 0;
+
+      document.getElementById(
+        'barangMasuk'
+      ).textContent =
+        data.barangMasuk ?? 0;
+
+      document.getElementById(
+        'barangKeluar'
+      ).textContent =
+        data.barangKeluar ?? 0;
+
+
+      const activity =
+        data.aktivitasTerakhir || [];
+
+      if (!activity.length) {
+
+        document.getElementById(
+          'recentActivity'
+        ).textContent =
+          'Belum ada aktivitas.';
+
+        return;
+
+      }
+
+      document.getElementById(
+        'recentActivity'
+      ).innerHTML =
+        createTable(activity);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /*
+   * ======================================
+   * BARANG
+   * ======================================
+   */
+
+  async function loadBarang() {
+
+    const container =
+      document.getElementById(
+        'barangTable'
+      );
+
+    container.textContent =
+      'Memuat...';
+
+    try {
+
+      const result =
+        await api('barang', {
+          token: sessionToken
+        });
+
+      if (!result.success) {
+
+        handleApiError(result);
+        return;
+
+      }
+
+      container.innerHTML =
+        createTable(
+          result.data
+        );
+
+    } catch (error) {
+
+      container.textContent =
+        'Gagal memuat barang.';
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /*
+   * ======================================
+   * STOK
+   * ======================================
+   */
+
+  async function loadStok() {
+
+    const container =
+      document.getElementById(
+        'stokTable'
+      );
+
+    container.textContent =
+      'Memuat...';
+
+    try {
+
+      const result =
+        await api('stok', {
+          token: sessionToken
+        });
+
+      if (!result.success) {
+
+        handleApiError(result);
+        return;
+
+      }
+
+      container.innerHTML =
+        createTable(
+          result.data
+        );
+
+    } catch (error) {
+
+      container.textContent =
+        'Gagal memuat stok.';
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /*
+   * ======================================
+   * USERS
+   * ======================================
+   */
+
+  async function loadUsers() {
+
+    const container =
+      document.getElementById(
+        'usersTable'
+      );
+
+    container.textContent =
+      'Memuat...';
+
+    try {
+
+      const result =
+        await api('users', {
+          token: sessionToken
+        });
+
+      if (!result.success) {
+
+        handleApiError(result);
+        return;
+
+      }
+
+      container.innerHTML =
+        createTable(
+          result.data
+        );
+
+    } catch (error) {
+
+      container.textContent =
+        'Gagal memuat pengguna.';
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /*
+   * ======================================
+   * TABLE GENERATOR
+   * ======================================
+   */
+
+  function createTable(rows) {
+
+    if (!Array.isArray(rows) ||
+        rows.length === 0) {
+
+      return '<p>Tidak ada data.</p>';
+
+    }
+
+    const headers =
+      Object.keys(rows[0]);
+
+    let html =
+      '<table><thead><tr>';
+
+    headers.forEach(header => {
+
+      html +=
+        '<th>' +
+        escapeHtml(header) +
+        '</th>';
+
+    });
+
+    html +=
+      '</tr></thead><tbody>';
+
+
+    rows.forEach(row => {
+
+      html += '<tr>';
+
+      headers.forEach(header => {
+
+        html +=
+          '<td>' +
+          escapeHtml(
+            row[header]
+          ) +
+          '</td>';
+
+      });
+
+      html += '</tr>';
+
+    });
+
+    html +=
+      '</tbody></table>';
+
+    return html;
+
+  }
+
+
+  /*
+   * ======================================
+   * SECURITY
+   * ======================================
+   */
+
+  function escapeHtml(value) {
+
+    if (value === null ||
+        value === undefined) {
+
+      return '';
+
+    }
+
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  /*
+   * ======================================
+   * API ERROR
+   * ======================================
+   */
+
+  function handleApiError(result) {
+
+    if (
+      result.message &&
+      result.message
+        .toLowerCase()
+        .includes('session')
+    ) {
+
+      logout();
+      return;
+
+    }
+
+    alert(
+      result.message ||
+      'Akses ditolak.'
+    );
+
+  }
+
+
+  /*
+   * ======================================
+   * LOGOUT
+   * ======================================
+   */
+
+  function logout() {
+
+    sessionToken = '';
+    currentUser = null;
+
+    localStorage.removeItem(
+      'stok_token'
+    );
+
+    localStorage.removeItem(
+      'stok_user'
+    );
+
+    document
+      .getElementById('appPage')
+      .classList.add('hidden');
+
+    document
+      .getElementById('loginPage')
+      .classList.remove('hidden');
+
+    document
+      .getElementById('password')
+      .value = '';
+
+  }
+
+
+  /*
+   * ======================================
+   * AUTO LOGIN
+   * ======================================
+   */
+
+  if (
+    sessionToken &&
+    currentUser
+  ) {
+
+    showApplication();
+
+  }
+
+</script>
+
 </body>
 </html>
