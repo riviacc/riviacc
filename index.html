@@ -615,28 +615,138 @@
         </div>
 
 
-        <!-- TRANSAKSI -->
+<!-- TRANSAKSI -->
 
-        <div
-          id="page-transaksi"
-          class="page hidden"
+<div
+  id="page-transaksi"
+  class="page hidden"
+>
+
+  <h2 class="page-title">
+    Transaksi
+  </h2>
+
+  <div class="panel">
+
+    <h3>Input Transaksi</h3>
+
+    <form id="transactionForm">
+
+      <div class="form-group">
+
+        <label for="transactionType">
+          Jenis Transaksi
+        </label>
+
+        <select
+          id="transactionType"
+          style="
+            width:100%;
+            padding:12px;
+            border:1px solid #cbd5e1;
+            border-radius:9px;
+          "
+          required
         >
 
-          <h2 class="page-title">
-            Transaksi
-          </h2>
+          <option value="MASUK">
+            Barang Masuk
+          </option>
 
-          <div class="panel">
+          <option value="KELUAR">
+            Barang Keluar
+          </option>
 
-            <p>
-              Form transaksi akan kita aktifkan
-              pada tahap berikutnya.
-            </p>
+        </select>
 
-          </div>
+      </div>
 
-        </div>
 
+      <div class="form-group">
+
+        <label for="transactionCode">
+          Kode Barang
+        </label>
+
+        <input
+          type="text"
+          id="transactionCode"
+          placeholder="Contoh: BRG001"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="transactionQty">
+          Jumlah
+        </label>
+
+        <input
+          type="number"
+          id="transactionQty"
+          min="1"
+          step="1"
+          placeholder="Jumlah barang"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="transactionNote">
+          Keterangan
+        </label>
+
+        <input
+          type="text"
+          id="transactionNote"
+          placeholder="Keterangan transaksi"
+        >
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        id="transactionButton"
+      >
+        Simpan Transaksi
+      </button>
+
+    </form>
+
+
+    <div
+      id="transactionMessage"
+      style="margin-top:15px;"
+    ></div>
+
+  </div>
+
+
+  <div class="panel">
+
+    <h3>Informasi</h3>
+
+    <p>
+      Barang masuk akan menambah stok.
+      Barang keluar akan mengurangi stok.
+    </p>
+
+    <p>
+      Sistem otomatis menolak barang keluar
+      apabila stok tidak mencukupi.
+    </p>
+
+  </div>
+
+</div>
 
         <!-- STOK -->
 
@@ -1316,6 +1426,175 @@
 
   }
 
+  /*
+ * ======================================
+ * TRANSAKSI
+ * ======================================
+ */
+
+document
+  .getElementById('transactionForm')
+  .addEventListener('submit', async function(event) {
+
+    event.preventDefault();
+
+    const type =
+      document
+        .getElementById('transactionType')
+        .value;
+
+    const kodeBarang =
+      document
+        .getElementById('transactionCode')
+        .value
+        .trim();
+
+    const qty =
+      Number(
+        document
+          .getElementById('transactionQty')
+          .value
+      );
+
+    const keterangan =
+      document
+        .getElementById('transactionNote')
+        .value
+        .trim();
+
+    const button =
+      document
+        .getElementById('transactionButton');
+
+    const message =
+      document
+        .getElementById('transactionMessage');
+
+
+    if (!kodeBarang) {
+
+      message.textContent =
+        'Kode barang wajib diisi.';
+
+      return;
+
+    }
+
+
+    if (!qty || qty <= 0) {
+
+      message.textContent =
+        'Jumlah harus lebih besar dari 0.';
+
+      return;
+
+    }
+
+
+    button.disabled = true;
+    button.textContent = 'Menyimpan...';
+
+    message.textContent = '';
+
+
+    try {
+
+      let result;
+
+
+      if (type === 'MASUK') {
+
+        result =
+          await api('barang_masuk', {
+
+            token: sessionToken,
+
+            data: {
+
+              kodeBarang: kodeBarang,
+
+              qty: qty,
+
+              keterangan: keterangan
+
+            }
+
+          });
+
+      } else {
+
+        result =
+          await api('barang_keluar', {
+
+            token: sessionToken,
+
+            data: {
+
+              kodeBarang: kodeBarang,
+
+              qty: qty,
+
+              keterangan: keterangan
+
+            }
+
+          });
+
+      }
+
+
+      if (!result.success) {
+
+        message.textContent =
+          '❌ ' +
+          (result.message ||
+           'Transaksi gagal.');
+
+        return;
+
+      }
+
+
+      message.textContent =
+        '✅ ' +
+        result.message +
+        ' Stok sekarang: ' +
+        result.stok.stokBaru;
+
+
+      document
+        .getElementById('transactionQty')
+        .value = '';
+
+      document
+        .getElementById('transactionNote')
+        .value = '';
+
+
+      // Refresh dashboard
+      loadDashboard();
+
+      // Refresh stok
+      loadStok();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      message.textContent =
+        '❌ Terjadi kesalahan koneksi.';
+
+    } finally {
+
+      button.disabled = false;
+
+      button.textContent =
+        'Simpan Transaksi';
+
+    }
+
+  });
 
   /*
    * ======================================
