@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aplikasi Stok</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <section id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="logo">📦</div>
+      <h1>Aplikasi Stok</h1>
+      <p>Masuk untuk melanjutkan</p>
+      <form id="loginForm">
+        <label>Username<input id="username" required autocomplete="username"></label>
+        <label>Password<input id="password" type="password" required autocomplete="current-password"></label>
+        <button class="primary" id="loginButton">Masuk</button>
+      </form>
+      <div id="loginMessage" class="message"></div>
+    </div>
+  </section>
+
+  <section id="appPage" class="hidden">
+    <header class="topbar">
+      <div class="brand">📦 Aplikasi Stok</div>
+      <div class="top-user"><span id="userName">-</span><span id="userRole" class="badge">-</span><button id="logoutButton" class="danger small">Keluar</button></div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <button class="nav active" data-page="dashboard">📊 Dashboard</button>
+        <button class="nav" data-page="barang">📦 Barang</button>
+        <button class="nav transaction-nav" data-page="transaksi">🔄 Transaksi</button>
+        <button class="nav" data-page="stok">📈 Stok</button>
+        <button class="nav stok-only" data-page="penyesuaian">⚖️ Penyesuaian</button>
+        <button class="nav admin-only" data-page="users">👥 Pengguna</button>
+        <button class="nav admin-only" data-page="log">📝 Log</button>
+      </aside>
+
+      <main class="content">
+        <section id="page-dashboard" class="page">
+          <h2>Dashboard</h2>
+          <div class="cards">
+            <div class="card"><span>Total Barang</span><b id="totalBarang">0</b></div>
+            <div class="card"><span>Total Stok</span><b id="totalStok">0</b></div>
+            <div class="card"><span>Stok Menipis</span><b id="stokMenipis">0</b></div>
+            <div class="card"><span>Stok Habis</span><b id="stokHabis">0</b></div>
+            <div class="card"><span>Total Masuk</span><b id="barangMasuk">0</b></div>
+            <div class="card"><span>Total Keluar</span><b id="barangKeluar">0</b></div>
+          </div>
+          <div class="panel"><h3>Aktivitas Terakhir</h3><div id="recentActivity"></div></div>
+        </section>
+
+        <section id="page-barang" class="page hidden">
+          <div class="section-head"><h2>Data Barang</h2><button id="addBarangButton" class="primary admin-only">+ Barang</button></div>
+          <div class="panel"><div id="barangTable"></div></div>
+        </section>
+
+        <section id="page-transaksi" class="page hidden">
+          <h2>Transaksi</h2>
+          <div class="panel">
+            <div class="grid-2">
+              <label>Jenis Transaksi<select id="trxType"><option value="MASUK">Barang Masuk</option><option value="KELUAR">Barang Keluar</option></select></label>
+              <label>Keterangan<input id="trxNote" placeholder="Contoh: Pengeluaran produksi"></label>
+            </div>
+            <div class="section-head"><h3>Daftar Barang</h3><button id="addItemButton" class="secondary">+ Tambah Barang</button></div>
+            <div id="trxItems"></div>
+            <div id="trxMessage" class="message"></div>
+            <button id="saveTrxButton" class="primary">Simpan Transaksi</button>
+          </div>
+        </section>
+
+        <section id="page-stok" class="page hidden">
+          <h2>Monitoring Stok</h2>
+          <div class="panel"><div id="stokTable"></div></div>
+        </section>
+
+        <section id="page-penyesuaian" class="page hidden">
+          <h2>Penyesuaian Stok</h2>
+          <div class="panel">
+            <form id="adjustForm" class="grid-2">
+              <label>Kode Barang<input id="adjustCode" required placeholder="BRG001"></label>
+              <label>Stok Baru<input id="adjustQty" type="number" min="0" required></label>
+              <label class="full">Keterangan<input id="adjustNote" placeholder="Hasil stock opname"></label>
+              <button class="primary">Simpan Penyesuaian</button>
+            </form>
+            <div id="adjustMessage" class="message"></div>
+          </div>
+        </section>
+
+        <section id="page-users" class="page hidden">
+          <div class="section-head"><h2>Pengguna</h2><button id="addUserButton" class="primary">+ Pengguna</button></div>
+          <div class="panel"><div id="usersTable"></div></div>
+        </section>
+
+        <section id="page-log" class="page hidden">
+          <h2>Log Aktivitas</h2>
+          <div class="panel"><div id="logTable"></div></div>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box"><button id="closeModal" class="modal-close">×</button><div id="modalContent"></div></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
