@@ -1,4 +1,4 @@
-const API_URL='https://script.google.com/macros/s/AKfycbx1DTb7OiIarQLyaRAUy0cNbYvnMUt0m3WPaXBjCks-FwAW5ZaJhoWp8fpQ_PDZANptBQ/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbx1DTb7OiIarQLyaRAUy0cNbYvnMUt0m3WPaXBjCks-FwAW5ZaJhoWp8fpQ_PDZANptBQ/exec'; 
 
 let token=localStorage.getItem('stok_token')||'';
 let user=JSON.parse(localStorage.getItem('stok_user')||'null');
