@@ -1432,170 +1432,156 @@
  * ======================================
  */
 
-document
-  .getElementById('transactionForm')
-  .addEventListener('submit', async function(event) {
+/*
+ * ======================================
+ * TRANSAKSI
+ * ======================================
+ */
 
-    event.preventDefault();
+const transactionForm =
+  document.getElementById('transactionForm');
 
-    const type =
-      document
-        .getElementById('transactionType')
-        .value;
+if (transactionForm) {
 
-    const kodeBarang =
-      document
-        .getElementById('transactionCode')
-        .value
-        .trim();
+  transactionForm.addEventListener(
+    'submit',
+    async function(event) {
 
-    const qty =
-      Number(
+      event.preventDefault();
+
+      const type =
         document
-          .getElementById('transactionQty')
+          .getElementById('transactionType')
+          .value;
+
+      const kodeBarang =
+        document
+          .getElementById('transactionCode')
           .value
-      );
+          .trim();
 
-    const keterangan =
-      document
-        .getElementById('transactionNote')
-        .value
-        .trim();
+      const qty =
+        Number(
+          document
+            .getElementById('transactionQty')
+            .value
+        );
 
-    const button =
-      document
-        .getElementById('transactionButton');
+      const keterangan =
+        document
+          .getElementById('transactionNote')
+          .value
+          .trim();
 
-    const message =
-      document
-        .getElementById('transactionMessage');
+      const button =
+        document.getElementById(
+          'transactionButton'
+        );
 
+      const message =
+        document.getElementById(
+          'transactionMessage'
+        );
 
-    if (!kodeBarang) {
-
-      message.textContent =
-        'Kode barang wajib diisi.';
-
-      return;
-
-    }
-
-
-    if (!qty || qty <= 0) {
-
-      message.textContent =
-        'Jumlah harus lebih besar dari 0.';
-
-      return;
-
-    }
-
-
-    button.disabled = true;
-    button.textContent = 'Menyimpan...';
-
-    message.textContent = '';
-
-
-    try {
-
-      let result;
-
-
-      if (type === 'MASUK') {
-
-        result =
-          await api('barang_masuk', {
-
-            token: sessionToken,
-
-            data: {
-
-              kodeBarang: kodeBarang,
-
-              qty: qty,
-
-              keterangan: keterangan
-
-            }
-
-          });
-
-      } else {
-
-        result =
-          await api('barang_keluar', {
-
-            token: sessionToken,
-
-            data: {
-
-              kodeBarang: kodeBarang,
-
-              qty: qty,
-
-              keterangan: keterangan
-
-            }
-
-          });
-
+      if (!kodeBarang) {
+        message.textContent =
+          'Kode barang wajib diisi.';
+        return;
       }
 
+      if (!qty || qty <= 0) {
+        message.textContent =
+          'Jumlah harus lebih besar dari 0.';
+        return;
+      }
 
-      if (!result.success) {
+      button.disabled = true;
+      button.textContent = 'Menyimpan...';
+
+      message.textContent = '';
+
+      try {
+
+        let result;
+
+        if (type === 'MASUK') {
+
+          result = await api(
+            'barang_masuk',
+            {
+              token: sessionToken,
+              data: {
+                kodeBarang: kodeBarang,
+                qty: qty,
+                keterangan: keterangan
+              }
+            }
+          );
+
+        } else {
+
+          result = await api(
+            'barang_keluar',
+            {
+              token: sessionToken,
+              data: {
+                kodeBarang: kodeBarang,
+                qty: qty,
+                keterangan: keterangan
+              }
+            }
+          );
+
+        }
+
+        if (!result.success) {
+
+          message.textContent =
+            '❌ ' +
+            (
+              result.message ||
+              'Transaksi gagal.'
+            );
+
+          return;
+        }
 
         message.textContent =
-          '❌ ' +
-          (result.message ||
-           'Transaksi gagal.');
+          '✅ ' +
+          result.message +
+          ' Stok sekarang: ' +
+          result.stok.stokBaru;
 
-        return;
+        document
+          .getElementById('transactionQty')
+          .value = '';
+
+        document
+          .getElementById('transactionNote')
+          .value = '';
+
+        loadDashboard();
+        loadStok();
+
+      } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+          '❌ Terjadi kesalahan koneksi.';
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent =
+          'Simpan Transaksi';
 
       }
 
-
-      message.textContent =
-        '✅ ' +
-        result.message +
-        ' Stok sekarang: ' +
-        result.stok.stokBaru;
-
-
-      document
-        .getElementById('transactionQty')
-        .value = '';
-
-      document
-        .getElementById('transactionNote')
-        .value = '';
-
-
-      // Refresh dashboard
-      loadDashboard();
-
-      // Refresh stok
-      loadStok();
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      message.textContent =
-        '❌ Terjadi kesalahan koneksi.';
-
-    } finally {
-
-      button.disabled = false;
-
-      button.textContent =
-        'Simpan Transaksi';
-
     }
+  );
 
-  });
-
+}
   /*
    * ======================================
    * LOGOUT
