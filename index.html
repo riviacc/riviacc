@@ -862,25 +862,62 @@
 
   async function api(action, data = {}) {
 
-    const response =
-      await fetch(API_URL, {
+  try {
 
-        method: 'POST',
+    const response = await fetch(API_URL, {
 
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
+      method: 'POST',
 
-        body: JSON.stringify({
-          action: action,
-          ...data
-        })
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
 
-      });
+      body: JSON.stringify({
+        action: action,
+        ...data
+      })
 
-    return await response.json();
+    });
+
+    const text = await response.text();
+
+    console.log('API RESPONSE:', text);
+
+    if (!response.ok) {
+      throw new Error(
+        'HTTP ' + response.status
+      );
+    }
+
+    try {
+
+      return JSON.parse(text);
+
+    } catch (jsonError) {
+
+      console.error(
+        'Response bukan JSON:',
+        text
+      );
+
+      throw new Error(
+        'Server mengembalikan response yang tidak valid.'
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      'API ERROR:',
+      error
+    );
+
+    throw error;
+
   }
 
+}
 
   /*
    * ======================================
