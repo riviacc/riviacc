@@ -862,63 +862,23 @@
 
   async function api(action, data = {}) {
 
-  try {
+  const response = await fetch(API_URL, {
 
-    const response = await fetch(API_URL, {
+    method: 'POST',
 
-      method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
 
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
+    body: JSON.stringify({
+      action: action,
+      ...data
+    })
 
-      body: JSON.stringify({
-        action: action,
-        ...data
-      })
+  });
 
-    });
-
-    const text = await response.text();
-
-    console.log('API RESPONSE:', text);
-
-    if (!response.ok) {
-      throw new Error(
-        'HTTP ' + response.status
-      );
-    }
-
-    try {
-
-      return JSON.parse(text);
-
-    } catch (jsonError) {
-
-      console.error(
-        'Response bukan JSON:',
-        text
-      );
-
-      throw new Error(
-        'Server mengembalikan response yang tidak valid.'
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      'API ERROR:',
-      error
-    );
-
-    throw error;
-
-  }
-
+  return await response.json();
 }
-
   /*
    * ======================================
    * LOGIN
