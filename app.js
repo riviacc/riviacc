@@ -86,18 +86,20 @@ async function login(e) {
       return;
     }
 
-    console.log('Mengirim login...');
+    message.textContent = '⏳ Memeriksa login...';
 
     const result = await api('login', {
-      username: username,
-      password: password
+      data: {
+        username: username,
+        password: password
+      }
     });
 
     console.log('Hasil login:', result);
 
-    if (!result || !result.success) {
+    if (!result || result.success !== true) {
       message.textContent =
-        '❌ ' + (result?.message || 'Login gagal.');
+        '❌ ' + (result?.message || 'Username atau password salah.');
       return;
     }
 
@@ -112,7 +114,7 @@ async function login(e) {
     showApp();
 
   } catch (error) {
-    console.error(error);
+    console.error('LOGIN ERROR:', error);
 
     message.textContent =
       '❌ ' + (error.message || 'Terjadi kesalahan koneksi.');
@@ -122,6 +124,7 @@ async function login(e) {
     button.textContent = 'Masuk';
   }
 }
+
 document.getElementById('loginForm').addEventListener('submit', login);
 
 function go(page){
