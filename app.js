@@ -4,13 +4,40 @@ let token=localStorage.getItem('stok_token')||'';
 let user=JSON.parse(localStorage.getItem('stok_user')||'null');
 let barangCache=[];
 
-async function api(action,data={}){
-  const response=await fetch(API_URL,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action,...data})
-  });
-  return await response.json();
+async function api(action, data = {}) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: action,
+        ...data
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('HTTP ' + response.status);
+    }
+
+    const text = await response.text();
+
+    if (!text) {
+      throw new Error('Server tidak mengembalikan data.');
+    }
+
+    console.log('API Response:', text);
+
+    return JSON.parse(text);
+
+  } catch (error) {
+    console.error('API ERROR:', error);
+
+    throw new Error(
+      'Koneksi ke server gagal: ' + error.message
+    );
+  }
 }
 
 const $=id=>document.getElementById(id);
@@ -40,15 +67,60 @@ function logout(){
   $('appPage').classList.add('hidden');$('loginPage').classList.remove('hidden');$('password').value='';
 }
 
-async function login(e){
+async function login(e) {
   e.preventDefault();
-  $('loginButton').disabled=true;$('loginButton').textContent='Memproses...';$('loginMessage').textContent='';
-  try{
-    const r=await api('login',{username:$('username').value.trim(),password:$('password').value});
-    if(!r.success){$('loginMessage').textContent='❌ '+r.message;return}
-    token=r.token;user=r.user;localStorage.setItem('stok_token',token);localStorage.setItem('stok_user',JSON.stringify(user));showApp();
-  }catch(err){console.error(err);$('loginMessage').textContent='❌ Tidak dapat terhubung ke server.'}
-  finally{$('loginButton').disabled=false;$('loginButton').textContent='Masuk'}
+
+  const message = document.getElementById('loginMessage');
+  const button = document.getElementById('loginButton');
+
+  message.textContent = '';
+  button.disabled = true;
+  button.textContent = 'Memproses...';
+
+  try {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+      message.textContent = '❌ Username dan password wajib diisi.';
+      return;
+    }
+
+    console.log('Mengirim login...');
+
+    const result = await api('login', {
+      username: username,
+      password: password
+    });
+
+    console.log('Hasil login:', result);
+
+    if (!result || !result.success) {
+      message.textContent =
+        '❌ ' + (result?.message || 'Login gagal.');
+      return;
+    }
+
+    token = result.token;
+    user = result.user;
+
+    localStorage.setItem('stok_token', token);
+    localStorage.setItem('stok_user', JSON.stringify(user));
+
+    message.textContent = '✅ Login berhasil.';
+
+    showApp();
+
+  } catch (error) {
+    console.error(error);
+
+    message.textContent =
+      '❌ ' + (error.message || 'Terjadi kesalahan koneksi.');
+
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Masuk';
+  }
 }
 
 function go(page){
