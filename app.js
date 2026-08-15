@@ -122,6 +122,7 @@ async function login(e) {
     button.textContent = 'Masuk';
   }
 }
+document.getElementById('loginForm').addEventListener('submit', login);
 
 function go(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
