@@ -258,12 +258,9 @@ async function nonaktifkanBarang(kodeBarang) {
     '\n\nBarang tidak akan dihapus dari riwayat transaksi.'
   );
 
-  if (!yakin) {
-    return;
-  }
+  if (!yakin) return;
 
   try {
-
     const r = await api('nonaktifkan_barang', {
       token: token,
       kodeBarang: kodeBarang
@@ -276,16 +273,12 @@ async function nonaktifkanBarang(kodeBarang) {
       return;
     }
 
-    alert(
-      '✅ ' +
-      (r.message || 'Barang berhasil dinonaktifkan.')
-    );
+    alert('✅ ' + (r.message || 'Barang berhasil dinonaktifkan.'));
 
     await loadBarang();
     await loadStok();
 
   } catch (error) {
-
     console.error('NONAKTIFKAN BARANG ERROR:', error);
 
     alert(
