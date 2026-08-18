@@ -161,8 +161,57 @@ async function loadDashboard(){
   }catch(e){console.error(e)}
 }
 
-async function loadBarang(){
-  const r=await api('barang',{token});if(!r.success)return apiError(r);barangCache=r.data||[];$('barangTable').innerHTML=table(r.data);
+async function loadBarang() {
+  try {
+    const r = await api('barang', { token });
+
+    if (!r.success) {
+      return apiError(r);
+    }
+
+    barangCache = r.data || [];
+
+    if (!barangCache.length) {
+      $('barangTable').innerHTML = '<p>Tidak ada data barang.</p>';
+      return;
+    }
+
+    const h = Object.keys(barangCache[0]);
+
+    $('barangTable').innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              ${h.map(x => `<th>${esc(x)}</th>`).join('')}
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${barangCache.map((r, index) => `
+              <tr>
+                ${h.map(x => `<td>${esc(r[x])}</td>`).join('')}
+                <td>
+                  <button
+                    type="button"
+                    class="secondary"
+                    onclick="openEditBarangModal(${index})">
+                    ✏️ Edit
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+  } catch (e) {
+    console.error(e);
+    $('barangTable').innerHTML =
+      '<p>❌ Gagal memuat data barang.</p>';
+  }
 }
 
 async function loadStok(){
@@ -230,6 +279,160 @@ function openBarangModal(){
   $('modalContent').innerHTML=`<h3>Tambah Barang</h3><form id="barangForm"><label>Kode Barang<input id="newCode" required></label><label>Nama Barang<input id="newBarangName" required></label><label>Kategori<input id="newKategori"></label><label>Satuan<input id="newSatuan" value="PCS" required></label><label>Stok Minimum<input id="newMinimum" type="number" min="0" value="0"></label><button class="primary">Simpan</button></form>`;
   $('modal').classList.remove('hidden');
   $('barangForm').onsubmit=async e=>{e.preventDefault();const r=await api('tambah_barang',{token,data:{kodeBarang:$('newCode').value,namaBarang:$('newBarangName').value,kategori:$('newKategori').value,satuan:$('newSatuan').value,stokMinimum:Number($('newMinimum').value),status:'Aktif'}});alert(r.message);if(r.success){$('modal').classList.add('hidden');loadBarang()}};
+}
+
+function openEditBarangModal(index) {
+  const barang = barangCache[index];
+
+  if (!barang) {
+    alert('Data barang tidak ditemukan.');
+    return;
+  }
+
+  $('modalContent').innerHTML = `
+    <h3>Edit Barang</h3>
+
+    <form id="editBarangForm">
+
+      <label>
+        Kode Barang
+        <input
+          id="editCode"
+          value="${esc(barang['Kode Barang'])}"
+          readonly
+        >
+      </label>
+
+      <label>
+        Nama Barang
+        <input
+          id="editBarangName"
+          value="${esc(barang['Nama Barang'])}"
+          required
+        >
+      </label>
+
+      <label>
+        Kategori
+        <input
+          id="editKategori"
+          value="${esc(barang['Kategori'])}"
+        >
+      </label>
+
+      <label>
+        Satuan
+        <input
+          id="editSatuan"
+          value="${esc(barang['Satuan'])}"
+          required
+        >
+      </label>
+
+      <label>
+        Stok Minimum
+        <input
+          id="editMinimum"
+          type="number"
+          min="0"
+          value="${Number(barang['Stok Minimum'] || 0)}"
+        >
+      </label>
+
+      <label>
+        Status
+        <select id="editStatus">
+          <option value="Aktif"
+            ${String(barang['Status']).toLowerCase() === 'aktif' ? 'selected' : ''}>
+            Aktif
+          </option>
+
+          <option value="Nonaktif"
+            ${String(barang['Status']).toLowerCase() === 'nonaktif' ? 'selected' : ''}>
+            Nonaktif
+          </option>
+        </select>
+      </label>
+
+      <div id="editBarangMessage" class="message"></div>
+
+      <button type="submit" class="primary">
+        Simpan Perubahan
+      </button>
+
+    </form>
+  `;
+
+  $('modal').classList.remove('hidden');
+
+  $('editBarangForm').onsubmit = async function(e) {
+    e.preventDefault();
+
+    const message = $('editBarangMessage');
+    const button = e.target.querySelector('button[type="submit"]');
+
+    button.disabled = true;
+    button.textContent = 'Menyimpan...';
+    message.textContent = '';
+
+    try {
+      const data = {
+        kodeBarang: $('editCode').value.trim(),
+        namaBarang: $('editBarangName').value.trim(),
+        kategori: $('editKategori').value.trim(),
+        satuan: $('editSatuan').value.trim(),
+        stokMinimum: Number($('editMinimum').value),
+        status: $('editStatus').value
+      };
+
+      if (!data.namaBarang) {
+        message.textContent = '❌ Nama barang wajib diisi.';
+        return;
+      }
+
+      if (!data.satuan) {
+        message.textContent = '❌ Satuan wajib diisi.';
+        return;
+      }
+
+      if (data.stokMinimum < 0) {
+        message.textContent = '❌ Stok minimum tidak boleh negatif.';
+        return;
+      }
+
+      const r = await api('edit_barang', {
+        token: token,
+        data: data
+      });
+
+      console.log('EDIT BARANG:', r);
+
+      if (!r.success) {
+        message.textContent =
+          '❌ ' + (r.message || 'Gagal mengubah barang.');
+        return;
+      }
+
+      message.textContent =
+        '✅ ' + (r.message || 'Barang berhasil diubah.');
+
+      await loadBarang();
+
+      setTimeout(() => {
+        $('modal').classList.add('hidden');
+      }, 700);
+
+    } catch (error) {
+      console.error('EDIT BARANG ERROR:', error);
+
+      message.textContent =
+        '❌ ' + error.message;
+
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Simpan Perubahan';
+    }
+  };
 }
 
 function apiError(r){
