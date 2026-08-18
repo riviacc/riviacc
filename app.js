@@ -173,9 +173,13 @@ async function loadBarang() {
     barangCache = r.data || [];
 
     if (!barangCache.length) {
-      $('barangTable').innerHTML = '<p>Tidak ada data barang.</p>';
+      $('barangTable').innerHTML =
+        '<p>Tidak ada data barang.</p>';
       return;
     }
+
+    const isAdmin =
+      String(user?.role || '').toLowerCase() === 'admin';
 
     const h = Object.keys(barangCache[0]);
 
@@ -192,15 +196,32 @@ async function loadBarang() {
           <tbody>
             ${barangCache.map((r, index) => `
               <tr>
-                ${h.map(x => `<td>${esc(r[x])}</td>`).join('')}
+                ${h.map(x => `
+                  <td>${esc(r[x])}</td>
+                `).join('')}
+
                 <td>
-                  <button
-                    type="button"
-                    class="secondary"
-                    onclick="openEditBarangModal(${index})">
-                    ✏️ Edit
-                  </button>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+
+                    <button
+                      type="button"
+                      class="secondary"
+                      onclick="openEditBarangModal(${index})">
+                      ✏️ Edit
+                    </button>
+
+                    ${isAdmin ? `
+                      <button
+                        type="button"
+                        class="danger small"
+                        onclick="nonaktifkanBarang('${esc(r['Kode Barang'])}')">
+                        🗑️ Hapus
+                      </button>
+                    ` : ''}
+
+                  </div>
                 </td>
+
               </tr>
             `).join('')}
           </tbody>
@@ -208,10 +229,69 @@ async function loadBarang() {
       </div>
     `;
 
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error('LOAD BARANG ERROR:', error);
+
     $('barangTable').innerHTML =
       '<p>❌ Gagal memuat data barang.</p>';
+  }
+}
+
+async function nonaktifkanBarang(kodeBarang) {
+
+  if (String(user?.role || '').toLowerCase() !== 'admin') {
+    alert('❌ Hanya Admin yang dapat menghapus barang.');
+    return;
+  }
+
+  const barang = barangCache.find(
+    x => String(x['Kode Barang']) === String(kodeBarang)
+  );
+
+  const namaBarang =
+    barang?.['Nama Barang'] || kodeBarang;
+
+  const yakin = confirm(
+    'Yakin ingin menonaktifkan barang berikut?\n\n' +
+    'Kode: ' + kodeBarang + '\n' +
+    'Nama: ' + namaBarang +
+    '\n\nBarang tidak akan dihapus dari riwayat transaksi.'
+  );
+
+  if (!yakin) {
+    return;
+  }
+
+  try {
+
+    const r = await api('nonaktifkan_barang', {
+      token: token,
+      kodeBarang: kodeBarang
+    });
+
+    console.log('NONAKTIFKAN BARANG:', r);
+
+    if (!r.success) {
+      alert('❌ ' + (r.message || 'Gagal menonaktifkan barang.'));
+      return;
+    }
+
+    alert(
+      '✅ ' +
+      (r.message || 'Barang berhasil dinonaktifkan.')
+    );
+
+    await loadBarang();
+    await loadStok();
+
+  } catch (error) {
+
+    console.error('NONAKTIFKAN BARANG ERROR:', error);
+
+    alert(
+      '❌ ' +
+      (error.message || 'Terjadi kesalahan koneksi.')
+    );
   }
 }
 
