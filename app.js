@@ -306,8 +306,28 @@ async function loadUsers(){
   const r=await api('users',{token});if(!r.success)return apiError(r);$('usersTable').innerHTML=table(r.data);
 }
 
-async function loadLog(){
-  const r=await api('log',{token});if(!r.success)return apiError(r);$('logTable').innerHTML=table(r.data);
+async function loadLog() {
+  if (String(user?.role || '').toLowerCase() !== 'admin') {
+    $('logTable').innerHTML =
+      '<p>❌ Hanya Admin yang dapat melihat log.</p>';
+    return;
+  }
+
+  try {
+    const r = await api('log', { token });
+
+    if (!r.success) {
+      return apiError(r);
+    }
+
+    $('logTable').innerHTML = table(r.data || []);
+
+  } catch (error) {
+    console.error('LOAD LOG ERROR:', error);
+
+    $('logTable').innerHTML =
+      '<p>❌ Gagal memuat log.</p>';
+  }
 }
 
 function loadBarangForTransaction(){
