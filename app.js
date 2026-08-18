@@ -1,9 +1,22 @@
 const API_URL='https://script.google.com/macros/s/AKfycbx1DTb7OiIarQLyaRAUy0cNbYvnMUt0m3WPaXBjCks-FwAW5ZaJhoWp8fpQ_PDZANptBQ/exec'; 
 
-let token=localStorage.getItem('stok_token')||'';
-let user=JSON.parse(localStorage.getItem('stok_user')||'null');
-let barangCache=[];
+let token = localStorage.getItem('stok_token') || '';
+let user = null;
+let barangCache = [];
 
+try {
+  const savedUser = localStorage.getItem('stok_user');
+
+  if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+    user = JSON.parse(savedUser);
+  }
+} catch (error) {
+  console.error('Data user lokal tidak valid:', error);
+  localStorage.removeItem('stok_user');
+  localStorage.removeItem('stok_token');
+  token = '';
+  user = null;
+}
 async function api(action, data = {}) {
   try {
     const response = await fetch(API_URL, {
