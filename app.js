@@ -178,10 +178,8 @@ async function loadBarang() {
       return;
     }
 
-    const isAdmin =
-      String(user?.role || '').toLowerCase() === 'admin';
-
     const h = Object.keys(barangCache[0]);
+    const role = String(user?.role || '').toLowerCase();
 
     $('barangTable').innerHTML = `
       <div class="table-wrap">
@@ -194,36 +192,42 @@ async function loadBarang() {
           </thead>
 
           <tbody>
-            ${barangCache.map((r, index) => `
-              <tr>
-                ${h.map(x => `
-                  <td>${esc(r[x])}</td>
-                `).join('')}
+            ${barangCache.map((r, index) => {
 
-                <td>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+              let aksi = `
+                <button
+                  type="button"
+                  class="secondary"
+                  onclick="openEditBarangModal(${index})">
+                  ✏️ Edit
+                </button>
+              `;
 
-                    <button
-                      type="button"
-                      class="secondary"
-                      onclick="openEditBarangModal(${index})">
-                      ✏️ Edit
-                    </button>
+              if (role === 'admin') {
+                aksi += `
+                  <button
+                    type="button"
+                    class="danger small"
+                    onclick="nonaktifkanBarang(${index})">
+                    🗑️ Hapus
+                  </button>
+                `;
+              }
 
-                    ${isAdmin ? `
-                      <button
-                        type="button"
-                        class="danger small"
-                        onclick="nonaktifkanBarang('${esc(r['Kode Barang'])}')">
-                        🗑️ Hapus
-                      </button>
-                    ` : ''}
+              return `
+                <tr>
+                  ${h.map(x => `
+                    <td>${esc(r[x])}</td>
+                  `).join('')}
 
-                  </div>
-                </td>
-
-              </tr>
-            `).join('')}
+                  <td>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      ${aksi}
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
       </div>
@@ -237,36 +241,41 @@ async function loadBarang() {
   }
 }
 
-async function nonaktifkanBarang(kodeBarang) {
+async function nonaktifkanBarang(index) {
 
   if (String(user?.role || '').toLowerCase() !== 'admin') {
     alert('❌ Hanya Admin yang dapat menghapus barang.');
     return;
   }
 
-  const barang = barangCache.find(
-    x => String(x['Kode Barang']) === String(kodeBarang)
-  );
+  const barang = barangCache[index];
 
-  const namaBarang =
-    barang?.['Nama Barang'] || kodeBarang;
+  if (!barang) {
+    alert('❌ Data barang tidak ditemukan.');
+    return;
+  }
+
+  const kodeBarang = barang['Kode Barang'];
+  const namaBarang = barang['Nama Barang'];
 
   const yakin = confirm(
-    'Yakin ingin menonaktifkan barang berikut?\n\n' +
+    'Yakin ingin menonaktifkan barang?\n\n' +
     'Kode: ' + kodeBarang + '\n' +
     'Nama: ' + namaBarang +
-    '\n\nBarang tidak akan dihapus dari riwayat transaksi.'
+    '\n\n' +
+    'Barang tidak akan dihapus dari riwayat transaksi.'
   );
 
   if (!yakin) return;
 
   try {
+
     const r = await api('nonaktifkan_barang', {
       token: token,
       kodeBarang: kodeBarang
     });
 
-    console.log('NONAKTIFKAN BARANG:', r);
+    console.log('HASIL HAPUS:', r);
 
     if (!r.success) {
       alert('❌ ' + (r.message || 'Gagal menonaktifkan barang.'));
@@ -279,7 +288,8 @@ async function nonaktifkanBarang(kodeBarang) {
     await loadStok();
 
   } catch (error) {
-    console.error('NONAKTIFKAN BARANG ERROR:', error);
+
+    console.error('HAPUS BARANG ERROR:', error);
 
     alert(
       '❌ ' +
