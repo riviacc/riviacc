@@ -147,6 +147,7 @@ function go(page){
   if(page==='barang')loadBarang();
   if(page==='stok')loadStok();
   if(page==='transaksi')loadBarangForTransaction();
+  if(page==='penyesuaian')loadAdjustmentBarang();
   if(page==='users')loadUsers();
   if(page==='log')loadLog();
 }
@@ -260,6 +261,42 @@ async function saveTransaction(){
     $('trxNote').value='';$('trxItems').innerHTML='';addItem();loadDashboard();
   }catch(e){console.error(e);msg.textContent='❌ Terjadi kesalahan koneksi.'}
   finally{$('saveTrxButton').disabled=false}
+}
+
+async function loadAdjustmentBarang() {
+  try {
+    const r = await api('barang', { token });
+
+    if (!r.success) {
+      return apiError(r);
+    }
+
+    const select = $('adjustCode');
+
+    if (!select) return;
+
+    const items = (r.data || []).filter(
+      x => String(x.Status || '').toLowerCase() === 'aktif'
+    );
+
+    select.innerHTML =
+      '<option value="">Pilih barang</option>' +
+      items.map(x => `
+        <option value="${esc(x['Kode Barang'])}">
+          ${esc(x['Kode Barang'])} - ${esc(x['Nama Barang'])}
+        </option>
+      `).join('');
+
+  } catch (error) {
+    console.error('LOAD BARANG PENYESUAIAN:', error);
+
+    const select = $('adjustCode');
+
+    if (select) {
+      select.innerHTML =
+        '<option value="">Gagal memuat barang</option>';
+    }
+  }
 }
 
 async function saveAdjustment(e){
