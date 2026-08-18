@@ -332,8 +332,245 @@ async function loadStok(){
   const r=await api('stok',{token});if(!r.success)return apiError(r);$('stokTable').innerHTML=table(r.data);
 }
 
-async function loadUsers(){
-  const r=await api('users',{token});if(!r.success)return apiError(r);$('usersTable').innerHTML=table(r.data);
+async function loadUsers() {
+  const r = await api('users', { token });
+
+  if (!r.success) {
+    return apiError(r);
+  }
+
+  const users = r.data || [];
+
+  if (!users.length) {
+    $('usersTable').innerHTML =
+      '<p>Tidak ada data pengguna.</p>';
+    return;
+  }
+
+  window.usersCache = users;
+
+  const h = Object.keys(users[0]);
+
+  $('usersTable').innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            ${h.map(x => `<th>${esc(x)}</th>`).join('')}
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${users.map((u, index) => `
+            <tr>
+              ${h.map(x => `
+                <td>${esc(u[x])}</td>
+              `).join('')}
+
+              <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+
+                  <button
+                    type="button"
+                    class="secondary"
+                    onclick="openEditUserModal(${index})">
+                    ✏️ Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    class="danger small"
+                    onclick="nonaktifkanUser(${index})">
+                    🗑️ Hapus
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openEditUserModal(index) {
+
+  // Pastikan hanya Admin
+  if (String(user?.role || '').toLowerCase() !== 'admin') {
+    alert('❌ Hanya Admin yang dapat mengedit pengguna.');
+    return;
+  }
+
+  const users = window.usersCache || [];
+  const u = users[index];
+
+  if (!u) {
+    alert('❌ Data pengguna tidak ditemukan.');
+    return;
+  }
+
+  const username = u['Username'] ?? u['username'] ?? '';
+  const name = u['Name'] ?? u['Nama'] ?? u['nama'] ?? '';
+  const role = String(u['Role'] ?? u['role'] ?? 'stok').toLowerCase();
+  const status = u['Status'] ?? 'Aktif';
+
+  $('modalContent').innerHTML = `
+    <h3>Edit Pengguna</h3>
+
+    <form id="editUserForm">
+
+      <label>
+        Username
+        <input
+          id="editUsername"
+          value="${esc(username)}"
+          readonly
+        >
+      </label>
+
+      <label>
+        Nama
+        <input
+          id="editUserName"
+          value="${esc(name)}"
+          required
+        >
+      </label>
+
+      <label>
+        Password
+        <input
+          id="editUserPassword"
+          type="password"
+          placeholder="Kosongkan jika tidak ingin mengubah password"
+        >
+      </label>
+
+      <label>
+        Role
+        <select id="editUserRole">
+          <option value="admin" ${role === 'admin' ? 'selected' : ''}>
+            Admin
+          </option>
+
+          <option value="gudang" ${role === 'gudang' ? 'selected' : ''}>
+            Gudang
+          </option>
+
+          <option value="stok" ${role === 'stok' ? 'selected' : ''}>
+            Stok
+          </option>
+        </select>
+      </label>
+
+      <label>
+        Status
+        <select id="editUserStatus">
+          <option value="Aktif" ${String(status).toLowerCase() === 'aktif' ? 'selected' : ''}>
+            Aktif
+          </option>
+
+          <option value="Nonaktif" ${String(status).toLowerCase() === 'nonaktif' ? 'selected' : ''}>
+            Nonaktif
+          </option>
+        </select>
+      </label>
+
+      <div id="editUserMessage" class="message"></div>
+
+      <button
+        type="submit"
+        class="primary"
+        id="editUserButton">
+        Simpan Perubahan
+      </button>
+
+    </form>
+  `;
+
+  $('modal').classList.remove('hidden');
+
+  $('editUserForm').onsubmit = async function(e) {
+
+    e.preventDefault();
+
+    const button = $('editUserButton');
+    const message = $('editUserMessage');
+
+    button.disabled = true;
+    button.textContent = 'Menyimpan...';
+    message.textContent = '';
+
+    try {
+
+      const data = {
+        username: $('editUsername').value.trim(),
+        Name: $('editUserName').value.trim(),
+        Role: $('editUserRole').value,
+        Status: $('editUserStatus').value
+      };
+
+      const password =
+        $('editUserPassword').value;
+
+      if (password) {
+        data.Password = password;
+      }
+
+      if (!data.username) {
+        message.textContent =
+          '❌ Username wajib diisi.';
+        return;
+      }
+
+      if (!data.Name) {
+        message.textContent =
+          '❌ Nama wajib diisi.';
+        return;
+      }
+
+      const r = await api('ubah_user', {
+        token: token,
+        data: data
+      });
+
+      console.log('HASIL EDIT USER:', r);
+
+      if (!r.success) {
+        message.textContent =
+          '❌ ' +
+          (r.message || 'Gagal mengubah user.');
+        return;
+      }
+
+      message.textContent =
+        '✅ ' +
+        (r.message || 'User berhasil diubah.');
+
+      await loadUsers();
+
+      setTimeout(() => {
+        $('modal').classList.add('hidden');
+      }, 700);
+
+    } catch (error) {
+
+      console.error('EDIT USER ERROR:', error);
+
+      message.textContent =
+        '❌ ' +
+        (error.message || 'Terjadi kesalahan koneksi.');
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent =
+        'Simpan Perubahan';
+    }
+  };
 }
 
 async function loadLog() {
