@@ -124,6 +124,7 @@ async function login(e) {
 }
 
 document.getElementById('loginForm').addEventListener('submit', login);
+console.log('LOGIN EVENT AKTIF');
 
 function go(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
