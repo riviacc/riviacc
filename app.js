@@ -73,7 +73,7 @@ async function login(e) {
   const message = document.getElementById('loginMessage');
   const button = document.getElementById('loginButton');
 
-  message.textContent = '';
+  message.textContent = '⏳ Memeriksa login...';
   button.disabled = true;
   button.textContent = 'Memproses...';
 
@@ -86,20 +86,18 @@ async function login(e) {
       return;
     }
 
-    message.textContent = '⏳ Memeriksa login...';
+    console.log('LOGIN:', username);
 
     const result = await api('login', {
-      data: {
-        username: username,
-        password: password
-      }
+      username: username,
+      password: password
     });
 
-    console.log('Hasil login:', result);
+    console.log('HASIL LOGIN:', result);
 
     if (!result || result.success !== true) {
       message.textContent =
-        '❌ ' + (result?.message || 'Username atau password salah.');
+        '❌ ' + (result?.message || 'Login gagal.');
       return;
     }
 
