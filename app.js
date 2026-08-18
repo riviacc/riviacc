@@ -369,25 +369,13 @@ async function loadUsers() {
               `).join('')}
 
               <td>
-                <div style="display:flex;gap:6px;flex-wrap:wrap">
-
-                  <button
-                    type="button"
-                    class="secondary"
-                    onclick="openEditUserModal(${index})">
-                    ✏️ Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    class="danger small"
-                    onclick="nonaktifkanUser(${index})">
-                    🗑️ Hapus
-                  </button>
-
-                </div>
+                <button
+                  type="button"
+                  class="secondary"
+                  onclick="openEditUserModal(${index})">
+                  ✏️ Edit
+                </button>
               </td>
-
             </tr>
           `).join('')}
         </tbody>
@@ -398,7 +386,6 @@ async function loadUsers() {
 
 function openEditUserModal(index) {
 
-  // Pastikan hanya Admin
   if (String(user?.role || '').toLowerCase() !== 'admin') {
     alert('❌ Hanya Admin yang dapat mengedit pengguna.');
     return;
@@ -412,10 +399,10 @@ function openEditUserModal(index) {
     return;
   }
 
-  const username = u['Username'] ?? u['username'] ?? '';
-  const name = u['Name'] ?? u['Nama'] ?? u['nama'] ?? '';
-  const role = String(u['Role'] ?? u['role'] ?? 'stok').toLowerCase();
-  const status = u['Status'] ?? 'Aktif';
+  const username = u['Username'] || '';
+  const name = u['Name'] || '';
+  const role = String(u['Role'] || '').toLowerCase();
+  const status = u['Status'] || 'Aktif';
 
   $('modalContent').innerHTML = `
     <h3>Edit Pengguna</h3>
@@ -427,8 +414,7 @@ function openEditUserModal(index) {
         <input
           id="editUsername"
           value="${esc(username)}"
-          readonly
-        >
+          readonly>
       </label>
 
       <label>
@@ -436,8 +422,7 @@ function openEditUserModal(index) {
         <input
           id="editUserName"
           value="${esc(name)}"
-          required
-        >
+          required>
       </label>
 
       <label>
@@ -445,8 +430,7 @@ function openEditUserModal(index) {
         <input
           id="editUserPassword"
           type="password"
-          placeholder="Kosongkan jika tidak ingin mengubah password"
-        >
+          placeholder="Kosongkan jika tidak diubah">
       </label>
 
       <label>
@@ -455,11 +439,9 @@ function openEditUserModal(index) {
           <option value="admin" ${role === 'admin' ? 'selected' : ''}>
             Admin
           </option>
-
           <option value="gudang" ${role === 'gudang' ? 'selected' : ''}>
             Gudang
           </option>
-
           <option value="stok" ${role === 'stok' ? 'selected' : ''}>
             Stok
           </option>
@@ -472,7 +454,6 @@ function openEditUserModal(index) {
           <option value="Aktif" ${String(status).toLowerCase() === 'aktif' ? 'selected' : ''}>
             Aktif
           </option>
-
           <option value="Nonaktif" ${String(status).toLowerCase() === 'nonaktif' ? 'selected' : ''}>
             Nonaktif
           </option>
@@ -483,8 +464,8 @@ function openEditUserModal(index) {
 
       <button
         type="submit"
-        class="primary"
-        id="editUserButton">
+        id="editUserButton"
+        class="primary">
         Simpan Perubahan
       </button>
 
@@ -520,18 +501,6 @@ function openEditUserModal(index) {
         data.Password = password;
       }
 
-      if (!data.username) {
-        message.textContent =
-          '❌ Username wajib diisi.';
-        return;
-      }
-
-      if (!data.Name) {
-        message.textContent =
-          '❌ Nama wajib diisi.';
-        return;
-      }
-
       const r = await api('ubah_user', {
         token: token,
         data: data
@@ -541,14 +510,12 @@ function openEditUserModal(index) {
 
       if (!r.success) {
         message.textContent =
-          '❌ ' +
-          (r.message || 'Gagal mengubah user.');
+          '❌ ' + (r.message || 'Gagal mengubah user.');
         return;
       }
 
       message.textContent =
-        '✅ ' +
-        (r.message || 'User berhasil diubah.');
+        '✅ ' + (r.message || 'User berhasil diubah.');
 
       await loadUsers();
 
@@ -567,8 +534,7 @@ function openEditUserModal(index) {
     } finally {
 
       button.disabled = false;
-      button.textContent =
-        'Simpan Perubahan';
+      button.textContent = 'Simpan Perubahan';
     }
   };
 }
