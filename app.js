@@ -62,15 +62,45 @@ function table(rows){
   return `<div class="table-wrap"><table><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${h.map(x=>`<td>${esc(r[x])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
-function showApp(){
+function showApp() {
   $('loginPage').classList.add('hidden');
   $('appPage').classList.remove('hidden');
-  $('userName').textContent=user?.nama||user?.username||'-';
-  $('userRole').textContent=user?.role||'-';
-  const role=(user?.role||'').toLowerCase();
-  document.querySelectorAll('.admin-only').forEach(e=>e.classList.toggle('hidden',role!=='admin'));
-  document.querySelectorAll('.stok-only').forEach(e=>e.classList.toggle('hidden',!['admin','stok'].includes(role)));
-  document.querySelectorAll('.transaction-nav').forEach(e=>e.classList.toggle('hidden',!['admin','gudang'].includes(role)));
+
+  $('userName').textContent =
+    user?.nama || user?.username || '-';
+
+  $('userRole').textContent =
+    user?.role || '-';
+
+  const role =
+    String(user?.role || '').trim().toLowerCase();
+
+  // ADMIN SAJA
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.classList.toggle('hidden', role !== 'admin');
+  });
+
+  // ADMIN + STOK
+  document.querySelectorAll('.stok-only').forEach(el => {
+    el.classList.toggle(
+      'hidden',
+      !['admin', 'stok'].includes(role)
+    );
+  });
+
+  // ADMIN + GUDANG
+  document.querySelectorAll('.transaction-nav').forEach(el => {
+    el.classList.toggle(
+      'hidden',
+      !['admin', 'gudang'].includes(role)
+    );
+  });
+
+  // Pengamanan tambahan khusus menu LOG
+  document.querySelectorAll('[data-page="log"]').forEach(el => {
+    el.classList.toggle('hidden', role !== 'admin');
+  });
+
   loadDashboard();
 }
 
