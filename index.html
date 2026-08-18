@@ -80,7 +80,12 @@
           <h2>Penyesuaian Stok</h2>
           <div class="panel">
             <form id="adjustForm" class="grid-2">
-              <label>Kode Barang<input id="adjustCode" required placeholder="BRG001"></label>
+              <label>
+  Kode Barang
+  <select id="adjustCode" required>
+    <option value="">Memuat barang...</option>
+  </select>
+</label>
               <label>Stok Baru<input id="adjustQty" type="number" min="0" required></label>
               <label class="full">Keterangan<input id="adjustNote" placeholder="Hasil stock opname"></label>
               <button class="primary">Simpan Penyesuaian</button>
